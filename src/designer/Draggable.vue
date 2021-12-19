@@ -1,11 +1,12 @@
 <template>
-  <div ref="draggable">
+  <div class="draggable-container" ref="draggable">
     <slot name="item" v-for="item in list" :key="item.id" :item="item.item"></slot>
   </div>
 </template>
 <script>
 import Sortable from 'sortablejs';
 export default {
+  name:"DesignerDraggable",
   props: {
     options: Object,
     items: Array,
@@ -47,9 +48,10 @@ export default {
                 list.splice(newIndex,0,element);//将元素插入到新元素去
                 const items = list.map(m=>m.item);
                 this.$emit("update:items",items);
+                console.log("add",event);
             }
             event.item.remove();
-            console.log("add",event);
+            
         },
         onClone: (event) =>  {
             const {oldIndex} = event;
@@ -57,10 +59,22 @@ export default {
             const element = list[oldIndex];//获取旧位置的元素
             element.id+=1;
             event.item.__element = JSON.stringify(element);
-            console.log("clone",event);
         },
+        onEnd:(event)=>{
+          //清除操作影响
+          event.item.remove();
+          const list = this.list ||[];
+          const items = list.map(m=>m.item);
+          this.$emit("update:items",items);
+        }
       });
     },
   },
 };
 </script>
+<style scoped>
+.draggable-container{
+  padding: 10px;
+  background-color: #eee;
+}
+</style>
